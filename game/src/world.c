@@ -1,39 +1,42 @@
 #include "world.h"
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
-Body* bodies = NULL;
-int bodyCount = 0;
+jlBody* jlBodies = NULL;
+int jlBodyCount = 0;
 
-Body* CreateBody() 
+jlBody* CreateBody() 
 {
 	//Allocate memory for new Body
-	Body* body = (Body*)malloc(sizeof(Body));
+	jlBody* body = (jlBody*)malloc(sizeof(jlBody));
 
 	//Check if allocation is successful
 	assert(body);
+
+	memset(body, 0, sizeof(jlBody));
 	
 	//Initialize 'prev' to NULL and 'next' to the head of the list
 	body->prev = NULL;
-	body->next = bodies;
+	body->next = jlBodies;
 
 	//If list is not empty, update 'prev' of existing head
-	if (bodies != NULL)
+	if (jlBodies != NULL)
 	{
-		bodies->prev = body;
+		jlBodies->prev = body;
 	}
 
 	//Update head of the list to new Body
-	bodies = body;
+	jlBodies = body;
 
 	//Increment body count
-	bodyCount++;
+	jlBodyCount++;
 
 	//Return new Body
 	return body;
 }
 
-void DestroyBody(Body* body)
+void DestroyBody(jlBody* body)
 {
 	//Assert if provided Body is not NULL
 	assert(body);
@@ -45,10 +48,10 @@ void DestroyBody(Body* body)
 	if (body->next != NULL) body->next->prev = body->prev;
 
 	//If body is the head, update head to 'body->next'
-	if (body == bodies) bodies = body->next;
+	if (body == jlBodies) jlBodies = body->next;
 
 	//Decrement body count
-	bodyCount--;
+	jlBodyCount--;
 	
 	//Free the body
 	free(body);

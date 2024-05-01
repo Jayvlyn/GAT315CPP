@@ -276,6 +276,7 @@
   <ItemGroup>
     <ClInclude Include="mathf.h" />
     <ClInclude Include="src\body.h" />
+    <ClInclude Include="src\Integrator.h" />
     <ClInclude Include="src\world.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
