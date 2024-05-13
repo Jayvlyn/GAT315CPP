@@ -1,12 +1,14 @@
 #include "world.h"
+#include "body.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 
 jlBody* jlBodies = NULL;
 int jlBodyCount = 0;
+Vector2 jlGravity;
 
-jlBody* CreateBody() 
+jlBody* CreateBody(Vector2 position, float mass, jlBodyType bodyType) 
 {
 	//Allocate memory for new Body
 	jlBody* body = (jlBody*)malloc(sizeof(jlBody));
@@ -15,18 +17,26 @@ jlBody* CreateBody()
 	assert(body);
 
 	memset(body, 0, sizeof(jlBody));
+	body->position = position;
+	body->mass = mass;
+	body->inverseMass = (bodyType == BT_DYNAMIC) ? 1 / mass : 0; // static and kinematic have no inverse mass
+	body->type = bodyType;
 	
+	return body;
+}
+
+void AddBody(jlBody* body)
+{
+	assert(body);
+
 	//Initialize 'prev' to NULL and 'next' to the head of the list
 	body->prev = NULL;
 	body->next = jlBodies;
 
 	//If list is not empty, update 'prev' of existing head
-	if (jlBodies != NULL)
-	{
-		jlBodies->prev = body;
-	}
+	if (jlBodies) jlBodies->prev = body;
 
-	//Update head of the list to new Body
+	// set head of elements to new elemnt
 	jlBodies = body;
 
 	//Increment body count

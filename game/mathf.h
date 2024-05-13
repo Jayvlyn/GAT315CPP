@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include <stdlib.h>
+#include "math.h"
 
 inline float GetRandomFloatValue01()
 {
