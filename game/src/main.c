@@ -31,6 +31,7 @@ int main(void)
 		// update
 		float dt = GetFrameTime();
 		float fps = (float)GetFPS();
+		jlGravity = (Vector2){ 0, jlEditorData.GravitySliderValue };
 
 		Vector2 position = GetMousePosition();
 		jlScreenZoom += GetMouseWheelMove() * 0.2f;
@@ -45,40 +46,44 @@ int main(void)
 			DrawCircleLines(screen.x, screen.y, ConvertWorldToPixel(selectedBody->mass) + 5, YELLOW);
 		}
 
-
-		// Create body
-		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		if (!jlEditorIntersect)
 		{
-			int bodyCount = GetRandomValue(100, 200);
-			bodyCount = 1;
-			for (int i = 0; i < bodyCount; i++)
+			// Create body
+			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 			{
-				jlBody* body = CreateBody(ConvertScreenToWorld(position), jlEditorData.MassMinSliderValue, jlEditorData.BodyTypeDropdownActive);
-				body->damping = 0;//0.5f;
-				body->gravityScale = 0;
-				body->color = ColorFromHSV(0, GetRandomFloatValue01(), GetRandomFloatValue01());
-				AddBody(body);
+				int bodyCount = GetRandomValue(100, 200);
+				bodyCount = 1;
+				for (int i = 0; i < bodyCount; i++)
+				{
+					jlBody* body = CreateBody(ConvertScreenToWorld(position), jlEditorData.MassMinSliderValue, jlEditorData.BodyTypeDropdownActive);
+					body->damping = 0;//0.5f;
+					body->gravityScale = 0;
+					body->color = ColorFromHSV(0, GetRandomFloatValue01(), GetRandomFloatValue01());
+					AddBody(body);
+				}
+				//CreateRandomFirework(position);
 			}
-			//CreateRandomFirework(position);
+
+			// connect spring
+			if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && selectedBody)
+			{
+				connectBody = selectedBody;
+			}
+			if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT) && connectBody)
+			{
+				DrawLineBodyToPosition(connectBody, position);
+			}
+			if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && connectBody)
+			{
+				if (selectedBody && selectedBody != connectBody)
+				{
+					jlSpring_t* spring = CreateSpring(selectedBody, connectBody, Vector2Distance(selectedBody->position, connectBody->position), 5);
+					AddSpring(spring);
+				}
+			}
 		}
 
-		// connect spring
-		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && selectedBody)
-		{
-			connectBody = selectedBody;
-		}
-		if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT) && connectBody)
-		{
-			DrawLineBodyToPosition(connectBody, position);
-		}
-		if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && connectBody)
-		{
-			if (selectedBody && selectedBody != connectBody)
-			{
-				jlSpring_t* spring = CreateSpring(selectedBody, connectBody, Vector2Distance(selectedBody->position, connectBody->position), 5);
-				AddSpring(spring);
-			}
-		}
+
 
 		ApplyGravitation(jlBodies, jlEditorData.GravitationSliderValue);
 		ApplySpringForce(jlSprings);

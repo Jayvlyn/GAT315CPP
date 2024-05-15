@@ -51,7 +51,7 @@ void ApplySpringForce(jlSpring_t* springs)
 {
 	for (jlSpring_t* spring = springs; spring; spring = spring->next)
 	{
-		Vector2 direction = Vector2Subtract(spring->body2->position,spring->body1->position);
+		Vector2 direction = Vector2Subtract(spring->body2->position, spring->body1->position);
 		if (direction.x == 0 && direction.y == 0) continue;
 
 		float length = Vector2Length(direction);

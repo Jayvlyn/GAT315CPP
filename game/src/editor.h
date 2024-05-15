@@ -18,12 +18,14 @@ typedef struct jlEditorData
     int BodyTypeDropdownActive;
     float MassMinSliderValue;
     float GravitationSliderValue;
-    float MassMaxSliderValue;
     float DampingSliderValue;
     float GravityScaleSliderValue;
+    float GravitySliderValue;
+    float StiffnessSliderValue;
 } jlEditorData_t;
 
 extern jlEditorData_t jlEditorData;
+extern bool jlEditorIntersect;
 
 extern bool ncEditorActive;
 extern bool ncEditorIntersect;
