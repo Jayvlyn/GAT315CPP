@@ -68,12 +68,12 @@ void DrawEditor(Vector2 position)
         jlEditorData.WorldGroupBoxActive = !GuiWindowBox((Rectangle) { jlEditorData.anchor01.x + 16, jlEditorData.anchor01.y + 280, 272, 256 }, "World");
         GuiGroupBox((Rectangle) { jlEditorData.anchor01.x + 0, jlEditorData.anchor01.y + 0, 304, 624 }, "Editor");
         GuiGroupBox((Rectangle) { jlEditorData.anchor01.x + 16, jlEditorData.anchor01.y + 40, 272, 224 }, "Body");
-        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 96, 168, 24 }, "Mass", NULL, & jlEditorData.MassMinSliderValue, 0, 100);
-        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 360, 168, 24 }, "Gravitation", NULL, & jlEditorData.GravitationSliderValue, 0, 100);
-        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 136, 168, 24 }, "Damping", NULL, & jlEditorData.DampingSliderValue, 0, 100);
-        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 176, 168, 24 }, "Gravity Scale", NULL, & jlEditorData.GravityScaleSliderValue, 0, 100);
-        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 320, 168, 24 }, "Gravity", NULL, & jlEditorData.GravitySliderValue, 0, 100);
-        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 216, 168, 24 }, "Stiffness(k)", NULL, & jlEditorData.StiffnessSliderValue, 0, 100);
+        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 96, 168, 24 }, "Mass", TextFormat("%0.2f", jlEditorData.MassMinSliderValue), &jlEditorData.MassMinSliderValue, 1, 10);
+        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 360, 168, 24 }, "Gravitation", TextFormat("%0.2f", jlEditorData.GravitationSliderValue), & jlEditorData.GravitationSliderValue, 0, 10);
+        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 136, 168, 24 }, "Damping", TextFormat("%0.2f", jlEditorData.DampingSliderValue), & jlEditorData.DampingSliderValue, 0, 5);
+        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 176, 168, 24 }, "Gravity Scale", TextFormat("%0.2f", jlEditorData.GravityScaleSliderValue), & jlEditorData.GravityScaleSliderValue, 0, 10);
+        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 320, 168, 24 }, "Gravity", TextFormat("%0.2f", jlEditorData.GravitySliderValue), & jlEditorData.GravitySliderValue, -10, 10);
+        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 216, 168, 24 }, "Stiffness(k)", TextFormat("%0.2f", jlEditorData.StiffnessSliderValue), & jlEditorData.StiffnessSliderValue, 0, 10);
         if (GuiDropdownBox((Rectangle) { jlEditorData.anchor01.x + 32, jlEditorData.anchor01.y + 64, 240, 24 }, "STATIC;KINEMATIC;DYNAMIC", & jlEditorData.BodyTypeDropdownActive, jlEditorData.BodyTypeDropdownEditMode)) jlEditorData.BodyTypeDropdownEditMode = !jlEditorData.BodyTypeDropdownEditMode;
     }
 

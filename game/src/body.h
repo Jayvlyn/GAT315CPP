@@ -31,6 +31,8 @@ typedef struct jlBody
 	float gravityScale;
 	float damping;
 
+	float restitution;
+
 	struct jlBody* next;
 	struct jlBody* prev;
 
@@ -48,7 +50,7 @@ inline void ApplyForce(jlBody* body, Vector2 force, jlForceMode forceMode)
 		break;
 	case FM_IMPLUSE:
 		// applies a sudden change in momentum
-		body->velocity = Vector2Scale(force, body->inverseMass);
+		body->velocity = Vector2Add(body->velocity, Vector2Scale(force, body->inverseMass));
 		break;
 	case FM_VELOCITY:
 		body->velocity = force;
