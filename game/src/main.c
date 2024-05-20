@@ -19,6 +19,10 @@ int main(void)
 {
 	jlBody* selectedBody = NULL;
 	jlBody* connectBody = NULL;
+	jlContact_t* contacts = NULL;
+
+	float fixedTimeStep = 1.0f / 50;
+	float timeAccumulator = 0;
 
 	InitWindow(1920, 1080, "Physics Engine");
 	InitEditor();
@@ -92,18 +96,23 @@ int main(void)
 		ApplyGravitation(jlBodies, jlEditorData.GravitationSliderValue);
 		ApplySpringForce(jlSprings);
 
-		// update bodies
-		for (jlBody* body = jlBodies; body; body = body->next)
+		timeAccumulator += dt;
+		while (timeAccumulator >= fixedTimeStep)
 		{
-			Step(body, dt);
+			timeAccumulator -= fixedTimeStep;
+
+			// update bodies
+			for (jlBody* body = jlBodies; body; body = body->next)
+			{
+				Step(body, fixedTimeStep);
+			}
+
+			//DestroyAllContacts(contacts);
+			contacts = NULL;
+			CreateContacts(jlBodies, &contacts);
+			SeparateContacts(contacts);
+			ResolveContacts(contacts);
 		}
-
-		// collision
-		jlContact_t* contacts = NULL;
-		CreateContacts(jlBodies, &contacts);
-		SeparateContacts(contacts);
-		ResolveContacts(contacts);
-
 
 		// render
 		BeginDrawing();
