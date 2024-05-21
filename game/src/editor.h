@@ -11,24 +11,28 @@
 
 typedef struct jlEditorData
 {
-    Vector2 anchor01;
+    Vector2 anchor02;
 
-    bool WorldGroupBoxActive;
+    bool EditorBoxActive;
     bool BodyTypeDropdownEditMode;
     int BodyTypeDropdownActive;
-    float MassMinSliderValue;
-    float GravitationSliderValue;
+    float MassSliderValue;
     float DampingSliderValue;
     float GravityScaleSliderValue;
-    float GravitySliderValue;
     float StiffnessSliderValue;
+    float RestitutionSliderValue;
+    float GravitationSliderValue;
+    float GravitySliderValue;
+    float TimestepSliderValue;
+    bool SimulateToggleActive;
+    bool ResetButtonPressed;
+
 } jlEditorData_t;
 
 extern jlEditorData_t jlEditorData;
 extern bool jlEditorIntersect;
 
 extern bool ncEditorActive;
-extern bool ncEditorIntersect;
 
 void InitEditor();
 void UpdateEditor(Vector2 position);

@@ -3,27 +3,13 @@
 #include "../../raygui/src/raygui.h"
 #include "render.h"
 
+#define EDITOR_DATA(data) TextFormat("%0.2f", data), &data
+
 bool ncEditorActive = true;
-bool ncEditorIntersect = false;
-Rectangle editorRect;
-
-Texture2D cursorTexture;
-
-// GUI VARS
-//bool EditorBoxActive = true;
-jlEditorData_t jlEditorData;
 bool jlEditorIntersect = false;
-Vector2 anchor01 = { 1600, 40 };
-
-bool WorldGroupBoxActive = true;
-bool BodyTypeDropdownEditMode = false;
-int BodyTypeDropdownActive = 0;
-float MassMinSliderValue = 0.0f;
-float GravitationSliderValue = 0.0f;
-float MassMaxSliderValue = 0.0f;
-float DampingSliderValue = 0.0f;
-float GravityScaleSliderValue = 0.0f;
-
+Rectangle editorRect;
+Texture2D cursorTexture;
+jlEditorData_t jlEditorData;
 
 void InitEditor()
 {
@@ -33,29 +19,31 @@ void InitEditor()
     UnloadImage(image);
     HideCursor();
 
-    jlEditorData.anchor01 = (Vector2){ 1500, 48 };
-
-    jlEditorData.WorldGroupBoxActive = true;
-    jlEditorData.BodyTypeDropdownEditMode = false;
+    jlEditorData.anchor02 = (Vector2){ 1400, 144 };
+    jlEditorData.EditorBoxActive = true;
     jlEditorData.BodyTypeDropdownActive = 0;
-    jlEditorData.MassMinSliderValue = 0.0f;
-    jlEditorData.GravitationSliderValue = 0.0f;
+    jlEditorData.BodyTypeDropdownEditMode = false;
+    jlEditorData.MassSliderValue = 3.0f;
     jlEditorData.DampingSliderValue = 0.0f;
-    jlEditorData.GravityScaleSliderValue = 0.0f;
+    jlEditorData.GravityScaleSliderValue = 10.0f;
+    jlEditorData.StiffnessSliderValue = 10.0f;
+    jlEditorData.RestitutionSliderValue = 0.0f;
+    jlEditorData.GravitationSliderValue = 0.0f;
     jlEditorData.GravitySliderValue = 0.0f;
-    jlEditorData.StiffnessSliderValue = 0.0f;
+    jlEditorData.TimestepSliderValue = 50.0f;
+    jlEditorData.SimulateToggleActive = true;
+    jlEditorData.ResetButtonPressed = false;
 
-    editorRect = (Rectangle){ jlEditorData.anchor01.x + 0, jlEditorData.anchor01.y + 0, 300, 600 };
-
+    editorRect = (Rectangle){ jlEditorData.anchor02.x + 0, jlEditorData.anchor02.y + -8, 432, 696 };
 }
 
 void UpdateEditor(Vector2 position)
 {
     // toggle show / hide editor box with key press
-    if (IsKeyPressed(KEY_TAB)) jlEditorData.WorldGroupBoxActive = !jlEditorData.WorldGroupBoxActive;
+    if (IsKeyPressed(KEY_TAB)) jlEditorData.EditorBoxActive = !jlEditorData.EditorBoxActive;
 
     // check if cursor position is intersecting the editor box 
-    ncEditorIntersect = jlEditorData.WorldGroupBoxActive && CheckCollisionPointRec(position, editorRect);
+    jlEditorIntersect = jlEditorData.EditorBoxActive && CheckCollisionPointRec(position, editorRect);
 }
 
 
@@ -63,18 +51,22 @@ void DrawEditor(Vector2 position)
 {
     if (jlEditorData.BodyTypeDropdownEditMode) GuiLock();
 
-    if (jlEditorData.WorldGroupBoxActive)
+    if (jlEditorData.EditorBoxActive)
     {
-        jlEditorData.WorldGroupBoxActive = !GuiWindowBox((Rectangle) { jlEditorData.anchor01.x + 16, jlEditorData.anchor01.y + 280, 272, 256 }, "World");
-        GuiGroupBox((Rectangle) { jlEditorData.anchor01.x + 0, jlEditorData.anchor01.y + 0, 304, 624 }, "Editor");
-        GuiGroupBox((Rectangle) { jlEditorData.anchor01.x + 16, jlEditorData.anchor01.y + 40, 272, 224 }, "Body");
-        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 96, 168, 24 }, "Mass", TextFormat("%0.2f", jlEditorData.MassMinSliderValue), &jlEditorData.MassMinSliderValue, 1, 10);
-        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 360, 168, 24 }, "Gravitation", TextFormat("%0.2f", jlEditorData.GravitationSliderValue), & jlEditorData.GravitationSliderValue, 0, 10);
-        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 136, 168, 24 }, "Damping", TextFormat("%0.2f", jlEditorData.DampingSliderValue), & jlEditorData.DampingSliderValue, 0, 5);
-        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 176, 168, 24 }, "Gravity Scale", TextFormat("%0.2f", jlEditorData.GravityScaleSliderValue), & jlEditorData.GravityScaleSliderValue, 0, 10);
-        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 320, 168, 24 }, "Gravity", TextFormat("%0.2f", jlEditorData.GravitySliderValue), & jlEditorData.GravitySliderValue, -10, 10);
-        GuiSliderBar((Rectangle) { jlEditorData.anchor01.x + 104, jlEditorData.anchor01.y + 216, 168, 24 }, "Stiffness(k)", TextFormat("%0.2f", jlEditorData.StiffnessSliderValue), & jlEditorData.StiffnessSliderValue, 0, 10);
-        if (GuiDropdownBox((Rectangle) { jlEditorData.anchor01.x + 32, jlEditorData.anchor01.y + 64, 240, 24 }, "STATIC;KINEMATIC;DYNAMIC", & jlEditorData.BodyTypeDropdownActive, jlEditorData.BodyTypeDropdownEditMode)) jlEditorData.BodyTypeDropdownEditMode = !jlEditorData.BodyTypeDropdownEditMode;
+        jlEditorData.EditorBoxActive = !GuiWindowBox(editorRect, "Editor");
+        GuiGroupBox((Rectangle) { jlEditorData.anchor02.x + 24, jlEditorData.anchor02.y + 56, 392, 288 }, "Body");
+        GuiGroupBox((Rectangle) { jlEditorData.anchor02.x + 24, jlEditorData.anchor02.y + 368, 392, 256 }, "World");
+        GuiSliderBar((Rectangle) { jlEditorData.anchor02.x + 120, jlEditorData.anchor02.y + 128, 232, 24 }, "Mass", EDITOR_DATA(jlEditorData.MassSliderValue), 1, 10);
+        GuiSliderBar((Rectangle) { jlEditorData.anchor02.x + 120, jlEditorData.anchor02.y + 160, 232, 24 }, "Damping", EDITOR_DATA(jlEditorData.DampingSliderValue),0, 10);
+        GuiSliderBar((Rectangle) { jlEditorData.anchor02.x + 120, jlEditorData.anchor02.y + 192, 232, 24 }, "Gravity Scale", EDITOR_DATA(jlEditorData.GravityScaleSliderValue), 0, 20);
+        GuiSliderBar((Rectangle) { jlEditorData.anchor02.x + 120, jlEditorData.anchor02.y + 224, 232, 24 }, "Stiffness(k)", EDITOR_DATA(jlEditorData.StiffnessSliderValue), 0, 40);
+        GuiSliderBar((Rectangle) { jlEditorData.anchor02.x + 120, jlEditorData.anchor02.y + 256, 232, 24 }, "Restitution", EDITOR_DATA(jlEditorData.RestitutionSliderValue), 0, 1);
+        GuiSliderBar((Rectangle) { jlEditorData.anchor02.x + 120, jlEditorData.anchor02.y + 440, 232, 24 }, "Gravitation", EDITOR_DATA(jlEditorData.GravitationSliderValue), 0, 10);
+        GuiSlider((Rectangle) { jlEditorData.anchor02.x + 120, jlEditorData.anchor02.y + 408, 232, 24 }, "Gravity", EDITOR_DATA(jlEditorData.GravitySliderValue), -10, 10);
+        GuiSliderBar((Rectangle) { jlEditorData.anchor02.x + 120, jlEditorData.anchor02.y + 472, 232, 24 }, "Timestep", EDITOR_DATA(jlEditorData.TimestepSliderValue), 0, 100);
+        GuiToggle((Rectangle) { jlEditorData.anchor02.x + 232, jlEditorData.anchor02.y + 632, 184, 32 }, "SIMULATE", & jlEditorData.SimulateToggleActive);
+        if (GuiDropdownBox((Rectangle) { jlEditorData.anchor02.x + 72, jlEditorData.anchor02.y + 80, 304, 32 }, "STATIC;KINEMATIC;DYNAMIC", & jlEditorData.BodyTypeDropdownActive, jlEditorData.BodyTypeDropdownEditMode)) jlEditorData.BodyTypeDropdownEditMode = !jlEditorData.BodyTypeDropdownEditMode;
+        jlEditorData.ResetButtonPressed = GuiButton((Rectangle) { jlEditorData.anchor02.x + 24, jlEditorData.anchor02.y + 632, 192, 32 }, "RESET");
     }
 
     DrawTexture(cursorTexture, (int)position.x - cursorTexture.width * 0.5f, (int)position.y - cursorTexture.height * 0.5f, WHITE);

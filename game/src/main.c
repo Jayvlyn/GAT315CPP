@@ -21,7 +21,7 @@ int main(void)
 	jlBody* connectBody = NULL;
 	jlContact_t* contacts = NULL;
 
-	float fixedTimeStep = 1.0f / 50;
+	float fixedTimeStep = 1.0f / jlEditorData.TimestepSliderValue;
 	float timeAccumulator = 0;
 
 	InitWindow(1920, 1080, "Physics Engine");
@@ -45,15 +45,20 @@ int main(void)
 
 		UpdateEditor(position);
 
-		selectedBody = GetBodyIntersect(jlBodies, position);
-		if (selectedBody)
+		if (jlEditorData.ResetButtonPressed)
 		{
-			Vector2 screen = ConvertWorldToScreen(selectedBody->position);
-			DrawCircleLines(screen.x, screen.y, ConvertWorldToPixel(selectedBody->mass * 0.5f) + 5, YELLOW);
+			DestroyAllBodies();
+			DestroyAllSprings();
 		}
 
 		if (!jlEditorIntersect)
 		{
+			selectedBody = GetBodyIntersect(jlBodies, position);
+			if (selectedBody)
+			{
+				Vector2 screen = ConvertWorldToScreen(selectedBody->position);
+				DrawCircleLines(screen.x, screen.y, ConvertWorldToPixel(selectedBody->mass * 0.5f) + 5, YELLOW);
+			}
 			// Create body
 			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && IsKeyDown(KEY_LEFT_CONTROL)))
 			{
@@ -61,15 +66,13 @@ int main(void)
 				bodyCount = 1;
 				for (int i = 0; i < bodyCount; i++)
 				{
-					jlBody* body = CreateBody(ConvertScreenToWorld(position), jlEditorData.MassMinSliderValue, jlEditorData.BodyTypeDropdownActive);
-					body->damping = 0;//0.5f;
+					jlBody* body = CreateBody(ConvertScreenToWorld(position), jlEditorData.MassSliderValue, jlEditorData.BodyTypeDropdownActive);
+					body->damping = jlEditorData.DampingSliderValue;
 					body->gravityScale = jlEditorData.GravityScaleSliderValue;
-					//body->color = ColorFromHSV(0, GetRandomFloatValue01(), GetRandomFloatValue01());
 					body->color = WHITE;
-					body->restitution = 0.3f;
+					body->restitution = jlEditorData.RestitutionSliderValue;
 					AddBody(body);
 				}
-				//CreateRandomFirework(position);
 			}
 
 			// connect spring
@@ -80,6 +83,22 @@ int main(void)
 			if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT) && connectBody)
 			{
 				DrawLineBodyToPosition(connectBody, position);
+				if (IsKeyDown(KEY_LEFT_ALT) && jlEditorData.SimulateToggleActive)
+				{
+					Vector2 direction = Vector2Subtract(ConvertScreenToWorld(position), connectBody->position);
+					if (direction.x != 0 || direction.y != 0)
+					{
+						float length = Vector2Length(direction);
+						float x = length - 1;
+						float force = x * jlEditorData.StiffnessSliderValue;
+
+						Vector2 ndirection = Vector2Normalize(direction);
+
+						ApplyForce(connectBody, Vector2Scale(ndirection, force), FM_FORCE);
+						connectBody->velocity = Vector2Scale(connectBody->velocity, 0.98);
+					}
+
+				}
 			}
 			if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && connectBody)
 			{
@@ -92,28 +111,31 @@ int main(void)
 		}
 
 
-
-		ApplyGravitation(jlBodies, jlEditorData.GravitationSliderValue);
-		ApplySpringForce(jlSprings);
-
-		timeAccumulator += dt;
-		while (timeAccumulator >= fixedTimeStep)
+		if (jlEditorData.SimulateToggleActive)
 		{
-			timeAccumulator -= fixedTimeStep;
+			ApplyGravitation(jlBodies, jlEditorData.GravitationSliderValue);
+			ApplySpringForce(jlSprings);
 
-			// update bodies
-			for (jlBody* body = jlBodies; body; body = body->next)
+			fixedTimeStep = 1.0f / jlEditorData.TimestepSliderValue;
+
+			timeAccumulator += dt;
+			while (timeAccumulator >= fixedTimeStep)
 			{
-				Step(body, fixedTimeStep);
+				timeAccumulator -= fixedTimeStep;
+
+				// update bodies
+				for (jlBody* body = jlBodies; body; body = body->next)
+				{
+					Step(body, fixedTimeStep);
+				}
+
+				//DestroyAllContacts(contacts);
+				contacts = NULL;
+				CreateContacts(jlBodies, &contacts);
+				SeparateContacts(contacts);
+				ResolveContacts(contacts);
 			}
-
-			//DestroyAllContacts(contacts);
-			contacts = NULL;
-			CreateContacts(jlBodies, &contacts);
-			SeparateContacts(contacts);
-			ResolveContacts(contacts);
 		}
-
 		// render
 		BeginDrawing();
 		ClearBackground(BLACK);
@@ -124,8 +146,6 @@ int main(void)
 		DrawText(TextFormat("FPS: %.2f (%.2fms)", fps, fps/1000), 10, 10, 20, LIME);
 		DrawText(TextFormat("FRAME: %.2f", dt), 10, 30, 20, LIME);
 
-		
-		//DrawCircle(position.x, position.y, 10, RED);
 
 		// draw bodies
 		for (jlBody* body = jlBodies; body; body = body->next)

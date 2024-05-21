@@ -66,3 +66,18 @@ void DestroyBody(jlBody* body)
 	//Free the body
 	free(body);
 }
+
+void DestroyAllBodies()
+{
+	if (!jlBodies) return;
+	jlBody* body = jlBodies;
+	jlBody* temp;
+
+	while (body)
+	{
+		temp = body->next;
+		free(body);
+		body = temp;
+	}
+	jlBodies = NULL;
+}

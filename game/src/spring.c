@@ -64,3 +64,18 @@ void ApplySpringForce(jlSpring_t* springs)
 		ApplyForce(spring->body2, Vector2Scale(ndirection, -force), FM_FORCE);
 	}
 }
+
+void DestroyAllSprings()
+{
+	if (!jlSprings) return;
+	jlSpring_t* spring = jlSprings;
+	jlSpring_t* temp;
+
+	while (spring)
+	{
+		temp = spring->next;
+		free(spring);
+		spring = temp;
+	}
+	jlSprings = NULL;
+}
